@@ -1,0 +1,15 @@
+# Public repository: only tools, server scripts and guides.
+# Photos, labels, label specs, progress sheets, predictions and results stay on the lab server (master copy).
+/*
+!/.gitignore
+!/README.md
+!/PANDUAN_TRAINING_3KELAS.md
+!/RUN_ON_SERVER.bat
+!/SERVER_JALANKAN.bat
+!/classes.txt
+!/tools/
+!/server_scripts/
+!/docs/
+
+__pycache__/
+*.pyc
