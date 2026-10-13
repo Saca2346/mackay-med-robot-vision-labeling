@@ -34,7 +34,18 @@ def todo():
     names = sorted(f[:-5] for f in os.listdir("label_specs_expiry") if f.endswith(".json"))
     order += [n for n in names if n not in order]
     return [n for n in order if os.path.exists(f"label_specs_expiry/{n}.json")
-            and json.load(open(f"label_specs_expiry/{n}.json")).get("status") != "selesai"]
+            and json.load(open(f"label_specs_expiry/{n}.json")).get("status") != "selesai" and not draft(n)]
+
+
+def draft(name):
+    """Boxes still a model draft (pred_to_spec note): their dates wait until the boxes are reviewed and converted
+    (tools/reviewed_to_spec.py), otherwise the date labels sit on wrong box numbers (14 Oct)."""
+    p = f"label_specs/{name}.json"
+    return os.path.exists(p) and json.load(open(p, encoding="utf-8")).get("note", "").startswith("SEDANG DIKERJAKAN")
+
+
+def total():
+    return sum(1 for f in os.listdir("label_specs_expiry") if f.endswith(".json") and not draft(f[:-5]))
 
 
 def se(*args):
@@ -54,19 +65,23 @@ def show(name):
 def open_sheet(name):
     r = subprocess.run([PY, "tools/lembar_tanggal.py", name], text=True, capture_output=True)
     p = r.stdout.strip() or f"preview_expiry/{name}_expiry.jpg"
-    subprocess.Popen(["xdg-open", p], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    print(f"  lembar: {p}")   # without a desktop (VS Code Remote-SSH) open this file in the editor instead
+    try:
+        subprocess.Popen(["xdg-open", p], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except FileNotFoundError:          # no xdg-open (not Ubuntu): the path printed above is enough
+        pass
 
 
 def main():
     lewati = set()
     while True:
         rest = [n for n in todo() if n not in lewati]
-        selesai = 163 - len(todo())
+        selesai, semua = total() - len(todo()), total()
         if not rest:
-            print(f"\nTidak ada foto tersisa (selesai {selesai}/163, dilewati {len(lewati)}).")
+            print(f"\nTidak ada foto tersisa (selesai {selesai}/{semua}, dilewati {len(lewati)}).")
             break
         name = rest[0]
-        print(f"\n===== {name}   (selesai {selesai}/163, sisa {len(rest)}) =====")
+        print(f"\n===== {name}   (selesai {selesai}/{semua}, sisa {len(rest)}) =====")
         open_sheet(name)
         show(name)
         while True:
