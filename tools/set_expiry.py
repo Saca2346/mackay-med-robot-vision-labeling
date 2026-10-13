@@ -5,6 +5,8 @@
   python tools/set_expiry.py NAME --add N T1 T2 [V1 V2] [--date YYYY-MM-DD]
                                                        label box N between fractions T1..T2 along it (0 = far end,
                                                        as in tools/grid.py strips) and V1..V2 across (default 0..1)
+  python tools/set_expiry.py NAME --date N YYYY-MM-DD   fix only the date text of box N (position unchanged)
+  python tools/set_expiry.py NAME --kosong N           box N checked by eye: no readable expiry date (clears a 'periksa' flag)
   python tools/set_expiry.py NAME --ok                 review done: labels become training labels (class 2)
   python tools/set_expiry.py NAME --redo               back to "auto" (not used for training)
 
@@ -12,6 +14,7 @@ After --ok run tools/make_labels.py NAME so labels_final_obb/ gets the class-2 r
 """
 import json
 import os
+import re
 import sys
 
 import cv2
@@ -30,6 +33,11 @@ def save(name, e):
 
 def main(a):
     name, op = a[0], a[1]
+    if not os.path.exists(raw_path(name)) or not os.path.exists(os.path.join(os.path.dirname(EXPIRY), "label_specs", name + ".json")):
+        sys.exit(f"'{name}' bukan nama foto (contoh: IMG_20260923_132244_872). Tidak ada yang diubah.")
+    for i, x in enumerate(a[2:], 2):
+        if x in ("N", "T1", "T2", "YYYY-MM-DD") or (op in ("--drop", "--date", "--add", "--kosong") and i == 2 and not x.isdigit()):
+            sys.exit(f"'{x}' harus diganti angka/tanggal sungguhan (nomor box, posisi 0..1, YYYY-MM-DD). Tidak ada yang diubah.")
     e = load_expiry(name) or {"expiry_label": [], "status": "auto", "note": ""}
     labels = e["expiry_label"]
     if op == "--show":
@@ -53,7 +61,24 @@ def main(a):
         e["expiry_label"] = [x for x in labels if x.get("box") != n] + [
             {"poly": poly, "box": n, "date": date, "text": "manual", "score": 1.0}]
         print(f"{name}: label box {n} t {t1}-{t2} v {v1}-{v2} ditambahkan")
+    elif op == "--date":
+        n, d = int(a[2]), a[3]
+        hit = [x for x in labels if x.get("box") == n]
+        if not hit or not re.fullmatch(r"20\d\d-\d\d-\d\d", d):
+            sys.exit(f"{name}: tidak ada label di box {n}, atau tanggal bukan YYYY-MM-DD. Tidak ada yang diubah.")
+        for x in hit:
+            x["date"], x["text"] = d, f"dikoreksi dari {x.get('date')}"
+        print(f"{name}: tanggal box {n} -> {d} (posisi label tetap)")
+    elif op == "--kosong":
+        n = int(a[2])
+        e["kosong"] = sorted(set(e.get("kosong", [])) | {n})
+        print(f"{name}: box {n} dicatat: sudah dilihat, TIDAK ada tanggal yang terbaca")
     elif op == "--ok":
+        done = {x.get("box") for x in labels} | set(e.get("kosong", []))
+        open_ = [b for b in e.get("periksa", []) if b not in done]
+        if open_:
+            sys.exit(f"{name}: box {open_} ditandai tajam tanpa label (tools/cek_tanggal_terlewat.py). Beri label "
+                     f"(--add / dari usulan) atau --kosong N bila memang tidak ada tanggal terlihat. Status tidak diubah.")
         e["status"] = "selesai"
         print(f"{name}: expiry_label selesai direview ({len(labels)} label) -> jalankan tools/make_labels.py {name}")
     elif op == "--redo":

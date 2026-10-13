@@ -40,7 +40,8 @@ PAD_W = 0.25                         # strip is read 25 % wider on each side (da
 _DIGIT = str.maketrans({"O": "0", "o": "0", "D": "0", "Q": "0", "I": "1", "l": "1", "|": "1", "Z": "2", "S": "5",
                         "B": "8"})
 _D = r"[0-9OoDQIl|ZSB]"
-_DATE = re.compile(rf"(?<![0-9])(2{_D}{_D}{_D})\s*[-./\s]\s*({_D}{_D})\s*[-./\s]\s*({_D}{_D})(?![0-9])")
+# one leading digit allowed: the hourglass icon before the date is often read as "8" (82029-09-21, 10-11)
+_DATE = re.compile(rf"(?<![0-9])[0-9]?(2{_D}{_D}{_D})\s*[-./\s]\s*({_D}{_D})\s*[-./\s]\s*({_D}{_D})(?![0-9])")
 
 
 def find_dates(text):

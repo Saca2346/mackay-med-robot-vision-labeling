@@ -19,7 +19,10 @@ folder move `mackay_vision\code`). The lab server (hucenrotia-ai) keeps the mast
 Classes (never add one, never use product names as class names):
 `0 box` (package spine), `1 size_label` (product name + size cluster), `2 expiry_label` (printed expiry date).
 
-Counts on 14 Oct: 1,826 box, 2,277 size_label, 719 expiry_label (in 76 photos; 87 photos still in the review pool).
+Counts on 14 Oct: 1,826 box, 2,277 size_label. Expiry labels after the server merge (14 Oct): 1,444 in all 163 photos,
+443 of them in the 51 reviewed (`selesai`) photos; 112 photos still `auto`. The server tightened the date labels and reopened 26
+photos with missed dates on 12 Oct (`docs/id/PANDUAN_LANJUTAN_3KELAS.md`); review them with `python tools/review_tanggal.py`.
+Laptop and server labels are identical since 14 Oct; the laptop copy before the merge is in `archive/laptop_before_server_merge_20261014/`.
 
 ## Guides
 
