@@ -138,7 +138,11 @@ def propose(name, ocr, img=None):
 
 
 def _lines(ocr, img):
-    res = ocr(img)
+    from rapidocr.utils.process_img import ResizeImgError
+    try:
+        res = ocr(img)
+    except ResizeImgError:            # extremely thin tile (e.g. a box draft over a bottle cap, 14 Oct): no text
+        return []
     return [] if res.txts is None else [(np.asarray(q, dtype=float), t, float(s))
                                         for q, t, s in zip(res.boxes, res.txts, res.scores)]
 
@@ -172,6 +176,8 @@ def _best_date(lines, after=None):
 
 
 def sheet(name, strips):
+    if not strips:                    # photo without boxes: nothing to show (np.vstack of [] raised, 14 Oct)
+        return "no sheet (0 box)"
     os.makedirs(PREVIEW, exist_ok=True)
     rows = []
     for n, s, best in strips:

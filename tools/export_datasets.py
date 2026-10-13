@@ -62,7 +62,8 @@ def label_dir(name):
 def seed_state(name):
     """('seed', status) for reviewed labels or a verified rotated spec, ('pool', reason) otherwise."""
     if label_dir(name) == REVIEWED:
-        return "seed", "direview di tool anotasi"
+        # same expiry rule as below: an unlabelled printed date would be learned as "not an expiry_label" (14 Oct)
+        return _expiry_state(name, "direview di tool anotasi")
     p = os.path.join(SPECS, name + ".json")
     if not os.path.exists(p):
         return "pool", "belum dilabel"
@@ -74,6 +75,10 @@ def seed_state(name):
     status = s.get("status", "selesai")
     if status != "selesai":
         return "pool", status
+    return _expiry_state(name, status)
+
+
+def _expiry_state(name, status):
     # every printed date must be labelled before a photo trains the 3-class model: an unlabelled date would be
     # learned as "not an expiry_label" (see tools/auto_expiry.py)
     e = load_expiry(name)
