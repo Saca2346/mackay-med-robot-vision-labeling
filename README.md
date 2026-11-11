@@ -7,22 +7,19 @@ folder move `mackay_vision\code`). The lab server (hucenrotia-ai) keeps the mast
 
 | Path | What it is |
 | --- | --- |
-| `raw/` | the labelled photos (163: 23 Sep, 28 Sep, 1 Oct) |
+| `raw/` | the labelled photos (196: 23 Sep, 28 Sep, 1 Oct) |
 | `label_specs/`, `label_specs_expiry/` | label specifications per photo (boxes + size labels; expiry labels with status `auto` / `selesai`) |
 | `labels_final_obb/` | final YOLO-OBB labels: `cls x1 y1 x2 y2 x3 y3 x4 y4` (normalised), classes in `classes.txt` |
 | `tools/` | labelling, checking, export, training and packing scripts |
 | `server_scripts/` + `RUN_ON_SERVER.bat` | server steps run from the laptop over ssh; outputs in `server_results/` |
-| `New image/` | 87 phone photos of 28 Sep; 33 of them (16h) are not in the dataset yet |
+| `New image/` | 87 phone photos of 28 Sep; 33 of them (16h) are now reviewed in the dataset |
 | `archive/` | old packages and results (`MOVED_FILES_20261014.csv` lists what was moved there) |
 | `docs/` | English guides; `docs/id/` Indonesian originals |
 
 Classes (never add one, never use product names as class names):
 `0 box` (package spine), `1 size_label` (product name + size cluster), `2 expiry_label` (printed expiry date).
 
-Counts on 14 Oct: 1,826 box, 2,277 size_label. Expiry labels after the server merge (14 Oct): 1,444 in all 163 photos,
-443 of them in the 51 reviewed (`selesai`) photos; 112 photos still `auto`. The server tightened the date labels and reopened 26
-photos with missed dates on 12 Oct (`docs/id/PANDUAN_LANJUTAN_3KELAS.md`); review them with `python tools/review_tanggal.py`.
-Laptop and server labels are identical since 14 Oct; the laptop copy before the merge is in `archive/laptop_before_server_merge_20261014/`.
+Reviewed server master on 14 Oct (Codex): 196 photos, 1,859 boxes, 2,306 size panels and 1,489 expiry labels; all 196 expiry specs are `selesai`, none remain `auto`. The 33 close-ups have been converted to specs. Geometry/readiness checks passed. Three-class training completed in 70 minutes; the v6 accuracy comparison failed and out-of-fold safety evaluation passed (0 wrong MATCH). The demo model is retained. See `../code/docs/CVAT_EXPIRY_REVIEW_20261014.md`. Laptop labels were synchronised and checked with server SHA-256 hashes; the prior laptop snapshot is retained in `audit_local/cvat_20261014/laptop_before_reviewed_master.tgz`.
 
 ## Guides
 

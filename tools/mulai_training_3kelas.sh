@@ -101,5 +101,6 @@ setsid nohup python tools/train_best.py --quick --models yolo11s-obb.pt@180 --ba
 sleep 45
 grep -a "foto berlabel" "$LOG" || { tail -20 "$LOG"; gagal "training tidak mulai, lihat $LOG"; }
 echo
-echo "Training berjalan. Cek:   tail -3 $LOG     |   selesai bila ada baris 'model final'"
+echo "Training running. Check: tail -3 $LOG"
+echo "Complete after 'selesai dalam ...', final weights in logs/best_model.json, and runs/best_final/done."
 echo "Perkiraan 1-1,5 jam (3 fold x 120 epoch + final 200 epoch)."
